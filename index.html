@@ -1,685 +1,575 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Momentum Matrix — organize priorities and make progress.">
-  <title>Momentum Matrix</title>
-  <style>
-    :root {
-      --blue: #3975f6;
-      --pink: #ff4fa3;
-      --ink: #20243a;
-      --muted: #777e91;
-      --surface: rgba(255, 255, 255, .82);
-      --border: #e8eaf2;
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(ellipse at 5% 0%, #e6edff 0, transparent 40%),
-        radial-gradient(ellipse at 95% 10%, #ffe5f1 0, transparent 35%),
-        #f8f9fd;
-    }
-
-    button, input, textarea { font: inherit; }
-
-    button { cursor: pointer; }
-
-    .container {
-      width: min(1180px, 92%);
-      margin: 0 auto;
-      padding: 36px 0 60px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 18px;
-      margin-bottom: 30px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      display: grid;
-      place-items: center;
-      width: 46px;
-      height: 46px;
-      border-radius: 15px;
-      color: white;
-      font-size: 23px;
-      background: linear-gradient(135deg, var(--blue), var(--pink));
-      box-shadow: 0 8px 24px #7488f444;
-    }
-
-    h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); }
-    .subtitle { margin: 5px 0 0; color: var(--muted); }
-
-    .date-label {
-      padding: 11px 15px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--muted);
-    }
-
-    .intro {
-      margin-bottom: 24px;
-      padding: 24px;
-      border: 1px solid #ffffff;
-      border-radius: 22px;
-      background: linear-gradient(115deg, #ffffffeb, #f8f1ffdf);
-      box-shadow: 0 12px 36px #293b6510;
-    }
-
-    .intro h2 { margin: 0 0 8px; font-size: 22px; }
-    .intro p { margin: 0; color: var(--muted); line-height: 1.6; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-
-    .stat {
-      padding: 18px;
-      border-radius: var(--radius);
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-
-    .stat-label { color: var(--muted); font-size: 13px; }
-    .stat-value { margin-top: 8px; font-size: 27px; font-weight: 750; }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin: 30px 0 16px;
-    }
-
-    .section-heading h2 { margin: 0; font-size: 21px; }
-
-    .matrix {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .quadrant {
-      min-width: 0;
-      padding: 19px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      box-shadow: 0 8px 28px #293b6509;
-      animation: appear .45s ease both;
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-
-    .quadrant:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 32px #293b6515;
-    }
-
-    .quadrant-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .quadrant h3 { margin: 0; font-size: 16px; }
-    .quadrant p { margin: 5px 0 0; font-size: 13px; color: var(--muted); }
-
-    .q-number {
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 11px;
-      font-weight: 800;
-      background: #edf1ff;
-      color: var(--blue);
-    }
-
-    .q-schedule .q-number { background: #fff0f7; color: #e23c8c; }
-    .q-delegate .q-number { background: #fff5e8; color: #b97517; }
-    .q-reduce .q-number { background: #e8f8f1; color: #23875e; }
-
-    .add-button, .primary-button {
-      border: 0;
-      border-radius: 11px;
-      padding: 10px 14px;
-      color: white;
-      background: linear-gradient(120deg, var(--blue), #7665f7);
-      font-weight: 650;
-      transition: transform .18s ease, opacity .18s ease;
-    }
-
-    .add-button:hover, .primary-button:hover { transform: translateY(-1px); }
-    .add-button { width: 100%; margin-top: 12px; }
-
-    .task-list { display: grid; gap: 9px; }
-
-    .task {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fff;
-      animation: appear .25s ease both;
-    }
-
-    .task input { margin-top: 4px; accent-color: var(--blue); }
-    .task-content { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-    .task.done .task-title { text-decoration: line-through; color: #999; }
-    .task-time { margin-top: 5px; font-size: 12px; color: var(--muted); }
-
-    .delete-button {
-      border: 0;
-      color: #a0a5b4;
-      background: transparent;
-      padding: 2px 5px;
-      border-radius: 6px;
-    }
-
-    .delete-button:hover { color: #d94378; background: #fff0f5; }
-    .empty { color: #a0a5b4; font-size: 13px; padding: 8px 0; }
-
-    .progress-track {
-      height: 9px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: #e9ebf4;
-      margin-top: 13px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--blue), var(--pink));
-      transition: width .6s ease;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: #161b3180;
-      backdrop-filter: blur(7px);
-    }
-
-    .modal.open { display: flex; animation: fade .2s ease; }
-
-    .modal-card {
-      width: min(460px, 100%);
-      padding: 24px;
-      border-radius: 22px;
-      background: white;
-      box-shadow: 0 25px 90px #0002;
-      animation: appear .25s ease;
-    }
-
-    .modal-card h2 { margin: 0 0 7px; }
-    .modal-card > p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
-
-    .field { display: grid; gap: 7px; margin-bottom: 15px; }
-    .field label { font-size: 13px; font-weight: 650; }
-
-    .field input, .field textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #dfe2ed;
-      border-radius: 10px;
-      outline: none;
-      background: #fcfcff;
-    }
-
-    .field input:focus, .field textarea:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px #3975f61a;
-    }
-
-    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .secondary-button {
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      background: white;
-    }
-
-    .toast {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 20;
-      max-width: calc(100% - 40px);
-      padding: 13px 17px;
-      border-radius: 12px;
-      color: white;
-      background: #242940;
-      box-shadow: 0 10px 30px #0002;
-      opacity: 0;
-      transform: translateY(12px);
-      pointer-events: none;
-      transition: opacity .2s, transform .2s;
-    }
-
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-
-    @media (max-width: 650px) {
-      .container { padding-top: 22px; }
-      .matrix { grid-template-columns: 1fr; }
-      .stats { gap: 8px; }
-      .stat { padding: 13px; }
-      .stat-value { font-size: 22px; }
-      .intro { padding: 19px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentum Matrix</title>
+<style>
+:root {
+  --bg:#f5f6fa; --panel:#fff; --text:#20253a; --muted:#777f94;
+  --border:#e8eaf1; --primary:#6759d8; --green:#198b68;
+  --red:#d95763; --amber:#bd801d; --blue:#3979cb;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font:15px/1.5 Inter,system-ui,-apple-system,sans-serif;
+}
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+.app { max-width:1440px; margin:auto; padding:26px; }
+header {
+  display:flex; justify-content:space-between; align-items:center;
+  gap:16px; flex-wrap:wrap; margin-bottom:25px;
+}
+.brand { display:flex; gap:12px; align-items:center; }
+.logo {
+  display:grid; place-items:center; width:46px; height:46px;
+  border-radius:14px; color:white; background:var(--primary);
+  font-size:23px; font-weight:800;
+}
+h1 { margin:0; font-size:25px; letter-spacing:-.7px; }
+.subtitle { color:var(--muted); font-size:13px; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; }
+.btn {
+  border:1px solid var(--border); background:white; color:var(--text);
+  border-radius:10px; padding:10px 14px; font-weight:600;
+}
+.btn.primary { background:var(--primary); color:white; border-color:var(--primary); }
+.btn:hover { filter:brightness(.97); }
+.stats {
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px; margin-bottom:20px;
+}
+.card,.panel {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:16px; padding:19px;
+}
+.stat-label { color:var(--muted); font-size:13px; }
+.stat-value { font-size:30px; font-weight:750; margin:6px 0; }
+.stat-note { color:var(--muted); font-size:12px; }
+.progress-track { height:7px; background:#ececf5; border-radius:9px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--primary); border-radius:9px; transition:width .25s; }
+.dashboard {
+  display:grid; grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);
+  gap:16px; margin-bottom:20px;
+}
+.panel-title {
+  display:flex; justify-content:space-between; align-items:center;
+  gap:10px; margin-bottom:15px;
+}
+h2 { font-size:17px; margin:0; }
+h3 { font-size:15px; margin:0; }
+.chart { width:100%; height:190px; display:block; }
+.chart-legend { display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:12px; }
+.dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; }
+.quadrant-heading { margin:25px 0 13px; }
+.matrix {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px;
+}
+.quadrant { padding:18px; min-width:0; }
+.qhead { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:13px; }
+.qname { display:flex; align-items:center; gap:9px; }
+.qicon { display:grid; place-items:center; width:35px; height:35px; border-radius:11px; font-size:17px; }
+.q1 .qicon { background:#fff0f0; color:var(--red); }
+.q2 .qicon { background:#eaf2ff; color:var(--blue); }
+.q3 .qicon { background:#fff5df; color:var(--amber); }
+.q4 .qicon { background:#e6f7f0; color:var(--green); }
+.qdesc { color:var(--muted); font-size:12px; margin-top:2px; }
+.count { background:#f0f1f7; border-radius:8px; padding:4px 9px; font-size:12px; }
+.task-list { display:grid; gap:9px; }
+.task {
+  border:1px solid var(--border); border-radius:11px;
+  padding:12px; display:flex; align-items:flex-start; gap:10px;
+}
+.task.done { opacity:.65; }
+.task.done .task-title { text-decoration:line-through; }
+.task-check { margin-top:4px; accent-color:var(--primary); width:16px; height:16px; flex-shrink:0; }
+.task-main { flex:1; min-width:0; }
+.task-title { font-weight:650; overflow-wrap:anywhere; }
+.task-meta { font-size:12px; color:var(--muted); margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.task-buttons { display:flex; gap:4px; }
+.icon-btn { border:0; background:transparent; padding:5px; color:var(--muted); border-radius:6px; }
+.icon-btn:hover { background:#f0f1f7; color:var(--text); }
+.empty { color:var(--muted); text-align:center; padding:18px 5px; font-size:13px; }
+.history { display:grid; gap:10px; }
+.history-row { display:grid; grid-template-columns:90px 1fr 40px; align-items:center; gap:10px; font-size:12px; }
+.history-bar { background:#eff0f7; height:8px; border-radius:9px; overflow:hidden; }
+.history-bar div { background:var(--green); height:100%; border-radius:9px; }
+footer { color:var(--muted); text-align:center; font-size:12px; padding:28px 0 5px; }
+dialog {
+  width:min(540px,calc(100% - 24px)); border:0; border-radius:17px;
+  padding:24px; color:var(--text); box-shadow:0 20px 80px #20253a33;
+}
+dialog::backdrop { background:#1c203866; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-top:16px; }
+.field { display:grid; gap:6px; }
+.field.full { grid-column:1/-1; }
+.field label { font-size:12px; font-weight:650; color:var(--muted); }
+.field input,.field select,.field textarea {
+  width:100%; border:1px solid var(--border); border-radius:9px;
+  padding:10px; color:var(--text); background:white;
+}
+.field textarea { resize:vertical; min-height:76px; }
+.modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:20px; }
+.notice { font-size:12px; color:var(--muted); margin-top:12px; }
+@media(max-width:850px) {
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dashboard { grid-template-columns:1fr; }
+}
+@media(max-width:560px) {
+  .app { padding:15px; }
+  .matrix { grid-template-columns:1fr; }
+  h1 { font-size:22px; }
+  .card,.panel { padding:15px; }
+  .form-grid { grid-template-columns:1fr; }
+  .field.full { grid-column:auto; }
+  .stat-value { font-size:25px; }
+}
+</style>
 </head>
 <body>
-  <main class="container">
-    <header>
-      <div class="brand">
-        <div class="logo" aria-hidden="true">✦</div>
-        <div>
-          <h1>Momentum Matrix</h1>
-          <p class="subtitle">A little progress, every day.</p>
-        </div>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <h1>Momentum Matrix</h1>
+        <div class="subtitle">Prioritize intentionally. Make progress consistently.</div>
       </div>
-      <div class="date-label" id="todayLabel"></div>
-    </header>
-
-    <section class="intro">
-      <h2>Make space for what matters.</h2>
-      <p>Sort your tasks by urgency and importance, track your progress, and focus on one meaningful next step. Your planned task times are optional.</p>
-      <div class="progress-track" aria-label="Daily completion progress">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </section>
-
-    <section class="stats" aria-label="Task statistics">
-      <div class="stat">
-        <div class="stat-label">Tasks today</div>
-        <div class="stat-value" id="totalCount">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Completed</div>
-        <div class="stat-value" id="doneCount">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Completion</div>
-        <div class="stat-value" id="percentCount">0%</div>
-      </div>
-    </section>
-
-    <div class="section-heading">
-      <h2>Today's priorities</h2>
-      <span id="taskSummary" class="subtitle">0 tasks</span>
     </div>
+    <div class="actions">
+      <button class="btn" id="exportBtn">Export backup</button>
+      <button class="btn" id="importBtn">Import backup</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <button class="btn primary" id="addBtn">＋ Add task</button>
+    </div>
+  </header>
 
-    <section class="matrix" aria-label="Eisenhower task matrix">
-      <article class="quadrant q-do">
-        <div class="quadrant-head">
-          <div>
-            <h3>Do first</h3>
-            <p>Urgent and important</p>
-          </div>
-          <span class="q-number">01</span>
-        </div>
-        <div class="task-list" id="list-do"></div>
-        <button class="add-button" data-add="do">+ Add task</button>
-      </article>
+  <section class="stats">
+    <div class="card">
+      <div class="stat-label">Total tasks</div>
+      <div class="stat-value" id="totalStat">0</div>
+      <div class="stat-note">Across all four quadrants</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value" id="completedStat">0</div>
+      <div class="stat-note" id="remainingStat">0 remaining</div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Completion rate</div>
+      <div class="stat-value" id="rateStat">0%</div>
+      <div class="progress-track"><div class="progress-fill" id="rateBar" style="width:0%"></div></div>
+    </div>
+    <div class="card">
+      <div class="stat-label">Overdue tasks</div>
+      <div class="stat-value" id="overdueStat">0</div>
+      <div class="stat-note">Uncompleted tasks past due date</div>
+    </div>
+  </section>
 
-      <article class="quadrant q-schedule">
-        <div class="quadrant-head">
-          <div>
-            <h3>Schedule</h3>
-            <p>Important, not urgent</p>
-          </div>
-          <span class="q-number">02</span>
-        </div>
-        <div class="task-list" id="list-schedule"></div>
-        <button class="add-button" data-add="schedule">+ Add task</button>
-      </article>
-
-      <article class="quadrant q-delegate">
-        <div class="quadrant-head">
-          <div>
-            <h3>Delegate</h3>
-            <p>Urgent, less important</p>
-          </div>
-          <span class="q-number">03</span>
-        </div>
-        <div class="task-list" id="list-delegate"></div>
-        <button class="add-button" data-add="delegate">+ Add task</button>
-      </article>
-
-      <article class="quadrant q-reduce">
-        <div class="quadrant-head">
-          <div>
-            <h3>Reduce</h3>
-            <p>Neither urgent nor important</p>
-          </div>
-          <span class="q-number">04</span>
-        </div>
-        <div class="task-list" id="list-reduce"></div>
-        <button class="add-button" data-add="reduce">+ Add task</button>
-      </article>
-    </section>
-  </main>
-
-  <div class="modal" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <form class="modal-card" id="taskForm">
-      <h2 id="modalTitle">Add a task</h2>
-      <p>Add the task first. Planned start and finish times are optional.</p>
-      <div class="field">
-        <label for="taskTitleInput">Task</label>
-        <textarea id="taskTitleInput" rows="2" maxlength="240" placeholder="What would you like to work on?" required></textarea>
+  <section class="dashboard">
+    <div class="panel">
+      <div class="panel-title">
+        <h2>Progress overview</h2>
+        <span class="subtitle">Last 7 days</span>
       </div>
-      <div class="time-grid">
-        <div class="field">
-          <label for="taskStartInput">Start time (optional)</label>
-          <input id="taskStartInput" type="time">
-        </div>
-        <div class="field">
-          <label for="taskEndInput">Finish time (optional)</label>
-          <input id="taskEndInput" type="time">
-        </div>
+      <canvas id="progressChart" class="chart" aria-label="Completed tasks per day"></canvas>
+      <div class="chart-legend">
+        <span><i class="dot" style="background:#198b68"></i>Tasks completed</span>
       </div>
-      <div class="field">
-        <label for="taskNotesInput">Notes (optional)</label>
-        <textarea id="taskNotesInput" rows="2" maxlength="500" placeholder="Add any helpful details…"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-title">
+        <h2>Quadrant distribution</h2>
       </div>
-      <div class="modal-actions">
-        <button class="secondary-button" type="button" id="cancelButton">Cancel</button>
-        <button class="primary-button" type="submit">Save task</button>
-      </div>
-    </form>
+      <div id="distribution"></div>
+      <p class="notice">Use the matrix to distinguish urgent work from important long-term priorities.</p>
+    </div>
+  </section>
+
+  <div class="panel-title quadrant-heading">
+    <div>
+      <h2>Your task matrix</h2>
+      <div class="subtitle">Add tasks to the quadrant that best matches their urgency and importance.</div>
+    </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <section class="matrix">
+    <div class="panel quadrant q1">
+      <div class="qhead">
+        <div class="qname"><div class="qicon">🔥</div><div><h3>Do First</h3><div class="qdesc">Urgent and important</div></div></div>
+        <span class="count" id="count-do">0</span>
+      </div>
+      <div class="task-list" id="list-do"></div>
+    </div>
+    <div class="panel quadrant q2">
+      <div class="qhead">
+        <div class="qname"><div class="qicon">🌱</div><div><h3>Schedule</h3><div class="qdesc">Important, not urgent</div></div></div>
+        <span class="count" id="count-schedule">0</span>
+      </div>
+      <div class="task-list" id="list-schedule"></div>
+    </div>
+    <div class="panel quadrant q3">
+      <div class="qhead">
+        <div class="qname"><div class="qicon">🤝</div><div><h3>Delegate</h3><div class="qdesc">Urgent, less important</div></div></div>
+        <span class="count" id="count-delegate">0</span>
+      </div>
+      <div class="task-list" id="list-delegate"></div>
+    </div>
+    <div class="panel quadrant q4">
+      <div class="qhead">
+        <div class="qname"><div class="qicon">🍃</div><div><h3>Eliminate</h3><div class="qdesc">Neither urgent nor important</div></div></div>
+        <span class="count" id="count-reduce">0</span>
+      </div>
+      <div class="task-list" id="list-reduce"></div>
+    </div>
+  </section>
 
-  <script>
-    (() => {
-      "use strict";
+  <section class="panel" style="margin-top:20px">
+    <div class="panel-title">
+      <h2>Completion history</h2>
+      <span class="subtitle">Based on recorded completion dates</span>
+    </div>
+    <div class="history" id="history"></div>
+  </section>
 
-      const STORAGE_KEY = "momentumMatrix.v1";
-      const QUADRANTS = ["do", "schedule", "delegate", "reduce"];
-      const $ = (id) => document.getElementById(id);
+  <footer>Momentum Matrix · Your data is saved in this browser.</footer>
+</div>
 
-      let tasks = loadTasks();
-      let activeQuadrant = "do";
-      let toastTimer;
+<dialog id="taskDialog">
+  <form id="taskForm">
+    <h2 id="dialogTitle">Add a task</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label for="taskTitle">Task title *</label>
+        <input id="taskTitle" maxlength="180" required placeholder="What needs to get done?">
+      </div>
+      <div class="field">
+        <label for="taskQuadrant">Quadrant</label>
+        <select id="taskQuadrant">
+          <option value="do">Do First</option>
+          <option value="schedule">Schedule</option>
+          <option value="delegate">Delegate</option>
+          <option value="reduce">Eliminate</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="taskDue">Due date</label>
+        <input id="taskDue" type="date">
+      </div>
+      <div class="field">
+        <label for="taskStart">Start time</label>
+        <input id="taskStart" type="time">
+      </div>
+      <div class="field">
+        <label for="taskEnd">End time</label>
+        <input id="taskEnd" type="time">
+      </div>
+      <div class="field full">
+        <label for="taskNotes">Notes</label>
+        <textarea id="taskNotes" maxlength="2000" placeholder="Details, reminders, or next steps..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn primary">Save task</button>
+    </div>
+  </form>
+</dialog>
 
-      function dateKey(date = new Date()) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      }
+<script>
+"use strict";
 
-      const today = dateKey();
+const STORAGE_KEY = "momentumMatrix.v1";
+const QUADRANTS = ["do", "schedule", "delegate", "reduce"];
+const LABELS = {
+  do: "Do First", schedule: "Schedule",
+  delegate: "Delegate", reduce: "Eliminate"
+};
+const $ = id => document.getElementById(id);
+const today = () => new Date().toISOString().slice(0, 10);
 
-      function loadTasks() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-          return Array.isArray(saved) ? saved.filter(
-            task => task && typeof task === "object" &&
-              typeof task.id === "string" &&
-              typeof task.title === "string" &&
-              QUADRANTS.includes(task.quadrant)
-          ) : [];
-        } catch (error) {
-          console.error("Could not load saved tasks:", error);
-          return [];
-        }
-      }
+function loadTasks() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(data) ? data.filter(t =>
+      t && typeof t.id === "string" &&
+      typeof t.title === "string" &&
+      QUADRANTS.includes(t.quadrant)
+    ) : [];
+  } catch {
+    return [];
+  }
+}
 
-      function saveTasks() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-          return true;
-        } catch (error) {
-          console.error("Could not save tasks:", error);
-          showToast("Could not save tasks in this browser.");
-          return false;
-        }
-      }
+let tasks = loadTasks();
+let editingId = null;
 
-      function showToast(message) {
-        const toast = $("toast");
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
-      }
+function saveTasks() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    return true;
+  } catch (error) {
+    alert("The browser could not save your tasks. Export a backup and check available storage.");
+    console.error(error);
+    return false;
+  }
+}
 
-      function openModal(quadrant) {
-        activeQuadrant = QUADRANTS.includes(quadrant) ? quadrant : "do";
-        $("taskForm").reset();
-        $("taskModal").classList.add("open");
-        $("taskTitleInput").focus();
-      }
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
 
-      function closeModal() {
-        $("taskModal").classList.remove("open");
-      }
+function makeId() {
+  return window.crypto && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
 
-      function addTask(event) {
-        const button = event.target.closest("[data-add]");
-        if (button) openModal(button.dataset.add);
-      }
+function render() {
+  const completed = tasks.filter(t => t.completed);
+  const remaining = tasks.length - completed.length;
+  const rate = tasks.length ? Math.round(completed.length / tasks.length * 100) : 0;
+  const overdue = tasks.filter(t => !t.completed && t.due && t.due < today()).length;
 
-      function submitTask(event) {
-        event.preventDefault();
+  $("totalStat").textContent = tasks.length;
+  $("completedStat").textContent = completed.length;
+  $("remainingStat").textContent = remaining + " remaining";
+  $("rateStat").textContent = rate + "%";
+  $("rateBar").style.width = rate + "%";
+  $("overdueStat").textContent = overdue;
 
-        const title = $("taskTitleInput").value.trim();
-        const startTime = $("taskStartInput").value;
-        const endTime = $("taskEndInput").value;
-        const notes = $("taskNotesInput").value.trim();
+  QUADRANTS.forEach(q => {
+    const items = tasks.filter(t => t.quadrant === q);
+    $("count-" + q).textContent = items.length;
+    const list = $("list-" + q);
+    list.innerHTML = "";
 
-        if (!title) {
-          showToast("Enter a task name first.");
-          $("taskTitleInput").focus();
-          return;
-        }
+    if (!items.length) {
+      list.innerHTML = '<div class="empty">No tasks here yet.</div>';
+      return;
+    }
 
-        if (Boolean(startTime) !== Boolean(endTime)) {
-          showToast("Enter both times, or leave both blank.");
-          return;
-        }
+    items.sort((a,b) => Number(a.completed) - Number(b.completed) ||
+      (a.due || "9999").localeCompare(b.due || "9999"));
 
-        if (startTime && endTime && endTime <= startTime) {
-          showToast("Finish time must be later than start time.");
-          return;
-        }
-
-        const task = {
-          id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`),
-          title,
-          notes,
-          quadrant: activeQuadrant,
-          date: today,
-          completed: false,
-          ...(startTime && endTime ? { startTime, endTime } : {})
-        };
-
-        tasks.push(task);
-
-        if (!saveTasks()) {
-          tasks = tasks.filter(item => item.id !== task.id);
-          return;
-        }
-
-        closeModal();
-        render();
-        showToast("Task added!");
-      }
-
-      function toggleTask(id) {
-        const task = tasks.find(item => item.id === id);
-        if (!task) return;
-
-        task.completed = !task.completed;
-
-        if (task.completed) {
-          task.completedAt = new Date().toISOString();
-        } else {
-          delete task.completedAt;
-        }
-
-        if (!saveTasks()) {
-          task.completed = !task.completed;
-          return;
-        }
-
-        render();
-      }
-
-      function deleteTask(id) {
-        const task = tasks.find(item => item.id === id);
-        if (!task) return;
-
-        tasks = tasks.filter(item => item.id !== id);
-
-        if (!saveTasks()) {
-          tasks.push(task);
-          return;
-        }
-
-        render();
-        showToast("Task removed.");
-      }
-
-      function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, char => ({
-          "&": "&amp;", "<": "&lt;", ">": "&gt;",
-          '"': "&quot;", "'": "&#39;"
-        })[char]);
-      }
-
-      function renderTask(task) {
-        const time = task.startTime && task.endTime
-          ? `${escapeHTML(task.startTime)} – ${escapeHTML(task.endTime)}`
-          : "No time set";
-
-        const element = document.createElement("div");
-        element.className = `task${task.completed ? " done" : ""}`;
-        element.innerHTML = `
-          <input type="checkbox" aria-label="Mark ${escapeHTML(task.title)} complete" ${task.completed ? "checked" : ""}>
-          <div class="task-content">
-            <div class="task-title">${escapeHTML(task.title)}</div>
-            ${task.notes ? `<div class="task-time">${escapeHTML(task.notes)}</div>` : ""}
-            <div class="task-time">${time}</div>
-          </div>
-          <button class="delete-button" type="button" aria-label="Delete task" title="Remove task">×</button>
-        `;
-
-        element.querySelector('input[type="checkbox"]').addEventListener("change", () => toggleTask(task.id));
-        element.querySelector(".delete-button").addEventListener("click", () => deleteTask(task.id));
-        return element;
-      }
-
-      function render() {
-        const todaysTasks = tasks.filter(task => task.date === today);
-        const completed = todaysTasks.filter(task => task.completed).length;
-        const total = todaysTasks.length;
-        const percent = total ? Math.round(completed / total * 100) : 0;
-
-        $("totalCount").textContent = total;
-        $("doneCount").textContent = completed;
-        $("percentCount").textContent = `${percent}%`;
-        $("taskSummary").textContent = `${total} task${total === 1 ? "" : "s"}`;
-        $("progressFill").style.width = `${percent}%`;
-
-        QUADRANTS.forEach(quadrant => {
-          const list = $(`list-${quadrant}`);
-          list.replaceChildren();
-
-          const group = todaysTasks.filter(task => task.quadrant === quadrant);
-          if (!group.length) {
-            const empty = document.createElement("div");
-            empty.className = "empty";
-            empty.textContent = "Nothing here yet — add a task when you're ready.";
-            list.appendChild(empty);
-            return;
-          }
-
-          group.forEach(task => list.appendChild(renderTask(task)));
-        });
-      }
-
-      $("todayLabel").textContent = new Intl.DateTimeFormat(undefined, {
-        weekday: "short", month: "short", day: "numeric", year: "numeric"
-      }).format(new Date());
-
-      document.querySelectorAll("[data-add]").forEach(button => {
-        button.addEventListener("click", addTask);
+    items.forEach(task => {
+      const el = document.createElement("div");
+      el.className = "task" + (task.completed ? " done" : "");
+      const timing = [task.due ? "Due " + task.due : "",
+        task.start && task.end ? task.start + "–" + task.end :
+        task.start || task.end || ""].filter(Boolean).join(" · ");
+      el.innerHTML = `
+        <input class="task-check" type="checkbox" aria-label="Mark completed"
+          ${task.completed ? "checked" : ""}>
+        <div class="task-main">
+          <div class="task-title">${escapeHTML(task.title)}</div>
+          ${timing ? `<div class="task-meta">${escapeHTML(timing)}</div>` : ""}
+          ${task.notes ? `<div class="task-meta">${escapeHTML(task.notes)}</div>` : ""}
+        </div>
+        <div class="task-buttons">
+          <button class="icon-btn edit" type="button" aria-label="Edit task" title="Edit">✎</button>
+          <button class="icon-btn delete" type="button" aria-label="Delete task" title="Delete">×</button>
+        </div>`;
+      el.querySelector(".task-check").addEventListener("change", e => {
+        task.completed = e.target.checked;
+        task.completedAt = task.completed ? today() : null;
+        saveTasks(); render();
       });
-
-      $("taskForm").addEventListener("submit", submitTask);
-      $("cancelButton").addEventListener("click", closeModal);
-
-      $("taskModal").addEventListener("click", event => {
-        if (event.target === $("taskModal")) closeModal();
+      el.querySelector(".edit").addEventListener("click", () => openEditor(task));
+      el.querySelector(".delete").addEventListener("click", () => {
+        if (confirm(`Delete "${task.title}"?`)) {
+          tasks = tasks.filter(t => t.id !== task.id);
+          saveTasks(); render();
+        }
       });
+      list.appendChild(el);
+    });
+  });
 
-      document.addEventListener("keydown", event => {
-        if (event.key === "Escape") closeModal();
-      });
+  renderDistribution();
+  renderChart();
+  renderHistory();
+}
 
-      render();
-    })();
-  </script>
+function renderDistribution() {
+  const total = tasks.length;
+  $("distribution").innerHTML = QUADRANTS.map(q => {
+    const count = tasks.filter(t => t.quadrant === q).length;
+    const pct = total ? Math.round(count / total * 100) : 0;
+    const color = {do:"#d95763",schedule:"#3979cb",delegate:"#bd801d",reduce:"#198b68"}[q];
+    return `<div style="margin:15px 0">
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px">
+        <span>${LABELS[q]}</span><span>${count} · ${pct}%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function renderChart() {
+  const canvas = $("progressChart");
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, rect.width * dpr);
+  canvas.height = Math.max(1, rect.height * dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  ctx.clearRect(0,0,w,h);
+
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = date.toISOString().slice(0,10);
+    days.push({key, label:date.toLocaleDateString(undefined,{weekday:"short"})});
+  }
+  const values = days.map(d => tasks.filter(t => t.completed && t.completedAt === d.key).length);
+  const max = Math.max(4, ...values);
+  const left = 25, right = 8, top = 12, bottom = 28;
+  const plotH = h - top - bottom;
+  const plotW = w - left - right;
+
+  ctx.font = "11px system-ui";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= 3; i++) {
+    const y = top + plotH - plotH * i / 3;
+    ctx.strokeStyle = "#eceef5";
+    ctx.beginPath(); ctx.moveTo(left,y); ctx.lineTo(w-right,y); ctx.stroke();
+    ctx.fillStyle = "#8a90a2";
+    ctx.fillText(String(Math.round(max*i/3)), left-7, y+4);
+  }
+  const slot = plotW / days.length;
+  const bw = Math.min(25, slot * .48);
+  values.forEach((v,i) => {
+    const bh = v / max * plotH;
+    const x = left + i*slot + (slot-bw)/2;
+    ctx.fillStyle = "#198b68";
+    ctx.beginPath();
+    ctx.roundRect(x, top+plotH-bh, bw, Math.max(0,bh), 5);
+    ctx.fill();
+    ctx.fillStyle = "#8a90a2";
+    ctx.textAlign = "center";
+    ctx.fillText(days[i].label, x+bw/2, h-8);
+  });
+}
+
+function renderHistory() {
+  const el = $("history");
+  const days = [];
+  for (let i=6; i>=0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate()-i);
+    const key = date.toISOString().slice(0,10);
+    days.push({key,label:date.toLocaleDateString(undefined,{month:"short",day:"numeric"})});
+  }
+  const values = days.map(d => tasks.filter(t => t.completed && t.completedAt === d.key).length);
+  const max = Math.max(1,...values);
+  el.innerHTML = days.map((d,i) => `
+    <div class="history-row">
+      <span>${d.label}</span>
+      <div class="history-bar"><div style="width:${values[i]/max*100}%"></div></div>
+      <strong style="text-align:right">${values[i]}</strong>
+    </div>`).join("");
+}
+
+function openEditor(task = null) {
+  editingId = task ? task.id : null;
+  $("dialogTitle").textContent = task ? "Edit task" : "Add a task";
+  $("taskTitle").value = task?.title || "";
+  $("taskQuadrant").value = task?.quadrant || "do";
+  $("taskDue").value = task?.due || "";
+  $("taskStart").value = task?.start || "";
+  $("taskEnd").value = task?.end || "";
+  $("taskNotes").value = task?.notes || "";
+  $("taskDialog").showModal();
+  $("taskTitle").focus();
+}
+
+$("addBtn").addEventListener("click", () => openEditor());
+$("cancelBtn").addEventListener("click", () => $("taskDialog").close());
+
+$("taskForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const title = $("taskTitle").value.trim();
+  if (!title) return;
+
+  const data = {
+    title,
+    quadrant: $("taskQuadrant").value,
+    due: $("taskDue").value,
+    start: $("taskStart").value,
+    end: $("taskEnd").value,
+    notes: $("taskNotes").value.trim()
+  };
+
+  if (data.start && data.end && data.end < data.start) {
+    alert("End time is earlier than start time. Please check the times.");
+    return;
+  }
+
+  if (editingId) {
+    const task = tasks.find(t => t.id === editingId);
+    if (task) Object.assign(task, data);
+  } else {
+    tasks.push({
+      id: makeId(), ...data, completed:false,
+      createdAt:today(), completedAt:null
+    });
+  }
+
+  if (saveTasks()) {
+    $("taskDialog").close();
+    render();
+  }
+});
+
+$("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({
+    app:"Momentum Matrix", version:1, exportedAt:new Date().toISOString(), tasks
+  },null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "momentum-matrix-backup.json";
+  a.click(); URL.revokeObjectURL(url);
+});
+
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    const incoming = Array.isArray(data) ? data : data.tasks;
+    if (!Array.isArray(incoming) || !incoming.every(t =>
+      t && typeof t.id === "string" && typeof t.title === "string" &&
+      QUADRANTS.includes(t.quadrant)
+    )) throw new Error("Invalid task backup");
+
+    if (!confirm("Importing will replace the tasks currently in this browser. Continue?")) return;
+    tasks = incoming.map(t => ({
+      id:t.id, title:t.title, quadrant:t.quadrant,
+      due:t.due || "", start:t.start || "", end:t.end || "",
+      notes:t.notes || "", completed:Boolean(t.completed),
+      createdAt:t.createdAt || today(),
+      completedAt:t.completed ? (t.completedAt || today()) : null
+    }));
+    if (saveTasks()) render();
+    alert("Backup imported successfully.");
+  } catch {
+    alert("Could not import this file. Choose a valid Momentum Matrix JSON backup.");
+  } finally {
+    e.target.value = "";
+  }
+});
+
+window.addEventListener("resize", renderChart);
+render();
+</script>
 </body>
 </html>
